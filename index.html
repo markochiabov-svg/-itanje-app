@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Nauči Čitati</title>
+  
+  <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/180/owl.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --primary: #3b82f6;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --radius: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 16px;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Start i Victory Overlays */
+    #start-overlay, #victory-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      gap: 20px;
+    }
+    #victory-overlay {
+      display: none;
+      background: rgba(248, 250, 252, 0.95);
+      text-align: center;
+      padding: 20px;
+    }
+
+    .main-btn {
+      background: var(--success);
+      color: white;
+      border: none;
+      font-size: 24px;
+      font-weight: 900;
+      padding: 18px 36px;
+      border-radius: 24px;
+      box-shadow: 0 6px 0 #15803d;
+      cursor: pointer;
+    }
+    .main-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #15803d;
+    }
+
+    /* Traka napretka (5 krugova) */
+    #progress-tracker {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+    .progress-dot {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #e2e8f0;
+      border: 3px solid #cbd5e1;
+      transition: all 0.3s ease;
+    }
+    .progress-dot.active {
+      background: #facc15;
+      border-color: #eab308;
+      box-shadow: 0 0 12px rgba(250, 204, 21, 0.6);
+      transform: scale(1.2);
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 20px;
+      max-width: 600px;
+    }
+
+    .tab-btn {
+      border: none;
+      background: #e2e8f0;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+      width: 100%;
+      max-width: 440px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .stage {
+      display: none;
+      width: 100%;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .stage.active {
+      display: flex;
+    }
+
+    /* FAZA 1 - Slajder */
+    .word-preview {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0;
+      min-height: 70px;
+      align-items: center;
+    }
+
+    .letter-node {
+      font-size: 40px;
+      font-weight: 900;
+      padding: 8px 12px;
+      border-radius: 12px;
+      color: #94a3b8;
+      transition: all 0.15s ease;
+    }
+
+    .letter-node.active {
+      color: var(--primary);
+      transform: scale(1.25) translateY(-6px);
+      text-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .track-container {
+      width: 100%;
+      height: 56px;
+      background: #e2e8f0;
+      border-radius: 28px;
+      position: relative;
+      margin: 20px 0 15px;
+      display: flex;
+      align-items: center;
+      padding: 4px;
+      touch-action: none;
+    }
+    
+    #sliderProgress {
+      position: absolute;
+      left: 4px;
+      top: 4px;
+      bottom: 4px;
+      width: 48px;
+      background: linear-gradient(90deg, #60a5fa, #3b82f6);
+      border-radius: 24px;
+      pointer-events: none;
+    }
+
+    .slider-handle {
+      width: 48px;
+      height: 48px;
+      background: #ffffff;
+      border-radius: 50%;
+      position: absolute;
+      left: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      touch-action: none;
+    }
+
+    /* FAZA 2 - Mikrofon */
+    .result-display {
+      width: 120px;
+      height: 120px;
+      border-radius: 24px;
+      background: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      margin: 15px 0;
+      border: 3px solid #e2e8f0;
+      transition: all 0.3s ease;
+    }
+
+    .result-display.hidden-content {
+      filter: blur(14px);
+      opacity: 0.3;
+    }
+
+    .mic-button {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      border: none;
+      background: #e2e8f0;
+      color: #334155;
+      font-size: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 15px 0;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+      transition: all 0.2s ease;
+    }
+
+    .mic-button.listening {
+      background: var(--danger);
+      color: #ffffff;
+      animation: pulse 1.2s infinite;
+    }
+
+    .mic-button.success {
+      background: var(--success);
+      color: #ffffff;
+      transform: scale(1.08);
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
+      70% { transform: scale(1.1); box-shadow: 0 0 0 18px rgba(239, 68, 68, 0); }
+      100% { transform: scale(1); }
+    }
+
+    .status-text {
+      font-size: 16px;
+      font-weight: 700;
+      color: #64748b;
+      margin: 8px 0;
+      min-height: 26px;
+      text-align: center;
+    }
+
+    .heard-text {
+      font-size: 15px;
+      color: #0ea5e9;
+      font-style: italic;
+      min-height: 20px;
+      margin-bottom: 8px;
+    }
+
+    /* FAZA 3 - Slaganje */
+    .slot-container, .tray-container {
+      display: flex;
+      gap: 10px;
+      margin: 15px 0;
+      min-height: 60px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .char-box {
+      width: 52px;
+      height: 60px;
+      border-radius: 12px;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      font-weight: 900;
+      border-bottom: 4px solid #cbd5e1;
+      color: #1e293b;
+    }
+
+    .char-box.filled {
+      border-bottom-color: var(--success);
+      color: var(--success);
+    }
+
+    .char-tile {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      background: #f8fafc;
+      border: 2px solid #cbd5e1;
+      box-shadow: 0 4px 0 #cbd5e1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      font-weight: 800;
+      color: #1e293b;
+      cursor: pointer;
+    }
+    .char-tile:active {
+      transform: translateY(4px);
+      box-shadow: 0 0 0 #cbd5e1;
+    }
+
+    .action-btn {
+      background: var(--success);
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 16px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 12px;
+      display: none;
+    }
+
+    .bypass-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 13px;
+      text-decoration: underline;
+      cursor: pointer;
+      margin-top: 8px;
+      display: none;
+    }
+
+    .nav-controls {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      margin-top: 5px;
+    }
+
+    .nav-arrow {
+      background: transparent;
+      border: 1px solid #cbd5e1;
+      padding: 6px 14px;
+      border-radius: 10px;
+      color: #64748b;
+      font-size: 14px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ekran za pokretanje -->
+  <div id="start-overlay">
+    <div style="font-size: 60px;">🦉</div>
+    <button class="main-btn" onclick="startGame()">POKRENI IGRU ▶️</button>
+  </div>
+
+  <!-- Pobjednički ekran -->
+  <div id="victory-overlay">
+    <div style="font-size: 80px; animation: pulse 1s infinite alternate;">🏆</div>
+    <h1 style="font-size: 32px; font-weight: 900; color: #eab308; margin: 10px 0;">BRAVO MAJSTORE!</h1>
+    <p style="font-size: 18px; color: #475569; max-width: 280px; margin-bottom: 20px;">Ispunio si svoj današnji cilj!</p>
+    <button class="main-btn" onclick="resetRound()">NOVA RUNDA 🔁</button>
+  </div>
+
+  <!-- Traka napretka -->
+  <div id="progress-tracker">
+    <div class="progress-dot"></div>
+    <div class="progress-dot"></div>
+    <div class="progress-dot"></div>
+    <div class="progress-dot"></div>
+    <div class="progress-dot"></div>
+  </div>
+
+  <div class="nav-tabs" id="categoryNav"></div>
+
+  <div class="card">
+    <div class="nav-controls">
+      <button class="nav-arrow" id="prevWordBtn">← Prethodna</button>
+      <button class="nav-arrow" id="nextWordBtn">Sljedeća →</button>
+    </div>
+
+    <!-- 1. FAZA: SLAJDER -->
+    <div class="stage active" id="stageSlider">
+      <div class="word-preview" id="sliderWordBox"></div>
+      <div class="track-container" id="track">
+        <div id="sliderProgress"></div>
+        <div class="slider-handle" id="sliderHandle">⭐</div>
+      </div>
+      <div class="status-text">Povuci zvjezdicu do kraja! 👉</div>
+    </div>
+
+    <!-- 2. FAZA: MIKROFON -->
+    <div class="stage" id="stageMic">
+      <div class="result-display hidden-content" id="micMysteryImage">?</div>
+      <button class="mic-button" id="micBtn">🎤</button>
+      <div class="status-text" id="micStatusText">Klikni mikrofon i reci riječ!</div>
+      <div class="heard-text" id="heardText"></div>
+      <button class="action-btn" id="goToSpellBtn">Složi slova ➔</button>
+      <button class="bypass-btn" id="bypassBtn">Preskoči izgovor ➔</button>
+    </div>
+
+    <!-- 3. FAZA: SLAGANJE SLOVA -->
+    <div class="stage" id="stageSpelling">
+      <div class="result-display" id="spellImage">?</div>
+      <div class="slot-container" id="slotContainer"></div>
+      <div class="tray-container" id="trayContainer"></div>
+      <div class="status-text" id="spellStatus">Poredaj slova po redu</div>
+      <button class="action-btn" id="restartBtn">Sljedeća riječ ➔</button>
+    </div>
+  </div>
+
+  <script>
+    const DATA = {
+      "Životinje": [
+        { word: "vuk", icon: "🐺" }, { word: "pas", icon: "🐶" }, { word: "lav", icon: "🦁" },
+        { word: "konj", icon: "🐴" }, { word: "riba", icon: "🐟" }, { word: "miš", icon: "🐭" },
+        { word: "koza", icon: "🐐" }, { word: "krava", icon: "🐄" }, { word: "ptica", icon: "🐦" }
+      ],
+      "Vozila": [
+        { word: "auto", icon: "🚗" }, { word: "vlak", icon: "🚂" }, { word: "brod", icon: "🚢" },
+        { word: "bager", icon: "🚜" }, { word: "avion", icon: "✈️" }, { word: "čamac", icon: "🛶" }
+      ],
+      "Halloween": [
+        { word: "duh", icon: "👻" }, { word: "sova", icon: "🦉" }, { word: "pauk", icon: "🕷️" },
+        { word: "kost", icon: "🦴" }, { word: "mrak", icon: "🌑" }, { word: "kotao", icon: "🥣" }
+      ],
+      "Tijelo": [
+        { word: "oko", icon: "👁️" }, { word: "uho", icon: "👂" }, { word: "nos", icon: "👃" },
+        { word: "zub", icon: "🦷" }, { word: "ruka", icon: "✋" }, { word: "noga", icon: "🦶" }
+      ]
+    };
+
+    let currentCategory = "Životinje";
+    let wordIndex = 0;
+    let graphemes = [];
+    let placedLetters = [];
+    let solvedCount = 0; 
+
+    // DIGRAFI (lj, nj, dž)
+    function splitGraphemes(word) {
+      const lower = word.toLowerCase();
+      const res = [];
+      for (let i = 0; i < lower.length; i++) {
+        if (i < lower.length - 1) {
+          const pair = lower[i] + lower[i+1];
+          if (pair === "lj" || pair === "nj" || pair === "dž") {
+            res.push(pair);
+            i++;
+            continue;
+          }
+        }
+        res.push(lower[i]);
+      }
+      return res;
+    }
+
+    // AUDIO INICIJALIZACIJA ZA iOS
+    let audioCtx = null;
+    let audioUnlocked = false;
+
+    function initAllAudio() {
+      if (audioUnlocked) return;
+      
+      // 1. Otključaj Web Audio
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      try {
+        const buffer = audioCtx.createBuffer(1, 1, 22050);
+        const source = audioCtx.createBufferSource();
+        source.buffer = buffer;
+        source.connect(audioCtx.destination);
+        source.start(0);
+      } catch(e) {}
+
+      // 2. Otključaj Govor (SpeechSynthesis)
+      if ('speechSynthesis' in window) {
+        const silentMsg = new SpeechSynthesisUtterance(' ');
+        silentMsg.lang = 'hr-HR';
+        window.speechSynthesis.speak(silentMsg);
+      }
+      
+      audioUnlocked = true;
+    }
+
+    function playTone(freq, dur) {
+      if (!audioCtx) return;
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + dur);
+      } catch(e) {}
+    }
+
+    function playFanfare() {
+      const notes = [523.25, 659.25, 783.99, 1046.50];
+      notes.forEach((freq, idx) => {
+        setTimeout(() => playTone(freq, 0.25), idx * 140);
+      });
+    }
+
+    // FONETSKA MAPA ZA ČISTI IZGOVOR (Maknute točke za lj, nj, dž da ne čita riječi)
+    const phonemeMap = {
+      'š': 'š.', 'č': 'č.', 'ć': 'ć.', 'ž': 'ž.', 'đ': 'đ.',
+      'lj': 'lj', 'nj': 'nj', 'dž': 'dž'
+    };
+
+    function speakText(text, rate = 0.85, onComplete = null) {
+      if (!('speechSynthesis' in window)) {
+        if (onComplete) onComplete();
+        return;
+      }
+      window.speechSynthesis.cancel();
+      
+      const cleanText = phonemeMap[text.toLowerCase()] ? phonemeMap[text.toLowerCase()] : text;
+      const u = new SpeechSynthesisUtterance(cleanText);
+      u.lang = 'hr-HR';
+      u.rate = rate;
+
+      if (onComplete) {
+        u.onend = () => onComplete();
+        u.onerror = () => onComplete();
+      }
+      window.speechSynthesis.speak(u);
+    }
+
+    function startGame() {
+      initAllAudio(); // OVO PALI ZVUK ZA iOS ODMAH NA PRVI KLIK
+      playTone(523.25, 0.15);
+      document.getElementById('start-overlay').style.display = 'none';
+      loadWord();
+    }
+
+    function updateTracker() {
+      const dots = document.querySelectorAll('.progress-dot');
+      dots.forEach((dot, idx) => {
+        if (idx < solvedCount) dot.classList.add('active');
+        else dot.classList.remove('active');
+      });
+    }
+
+    function resetRound() {
+      solvedCount = 0;
+      updateTracker();
+      document.getElementById('victory-overlay').style.display = 'none';
+      document.getElementById("nextWordBtn").click();
+    }
+
+    // KATEGORIJE
+    const categoryNav = document.getElementById("categoryNav");
+    Object.keys(DATA).forEach(cat => {
+      const btn = document.createElement("button");
+      btn.className = `tab-btn ${cat === currentCategory ? 'active' : ''}`;
+      btn.innerText = cat;
+      btn.onclick = () => {
+        currentCategory = cat;
+        wordIndex = 0;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        loadWord();
+      };
+      categoryNav.appendChild(btn);
+    });
+
+    document.getElementById("prevWordBtn").onclick = () => {
+      const list = DATA[currentCategory];
+      wordIndex = (wordIndex - 1 + list.length) % list.length;
+      loadWord();
+    };
+
+    document.getElementById("nextWordBtn").onclick = () => {
+      const list = DATA[currentCategory];
+      wordIndex = (wordIndex + 1) % list.length;
+      loadWord();
+    };
+
+    function loadWord() {
+      const item = DATA[currentCategory][wordIndex];
+      graphemes = splitGraphemes(item.word);
+      placedLetters = [];
+
+      showStage("stageSlider");
+
+      const sliderBox = document.getElementById("sliderWordBox");
+      sliderBox.innerHTML = "";
+      graphemes.forEach((g, idx) => {
+        const node = document.createElement("div");
+        node.className = "letter-node";
+        node.id = `node-${idx}`;
+        node.innerText = g.toUpperCase();
+        sliderBox.appendChild(node);
+      });
+
+      resetSliderHandle();
+
+      // Reset mikrofona
+      const micImg = document.getElementById("micMysteryImage");
+      micImg.innerText = item.icon;
+      micImg.className = "result-display hidden-content";
+
+      const micBtn = document.getElementById("micBtn");
+      micBtn.className = "mic-button";
+      micBtn.innerText = "🎤";
+      document.getElementById("micStatusText").innerText = "Klikni mikrofon i reci riječ!";
+      document.getElementById("heardText").innerText = "";
+      document.getElementById("goToSpellBtn").style.display = "none";
+      document.getElementById("bypassBtn").style.display = "none";
+
+      document.getElementById("spellImage").innerText = item.icon;
+      setupSpellingStage();
+    }
+
+    function showStage(stageId) {
+      document.querySelectorAll(".stage").forEach(s => s.classList.remove("active"));
+      document.getElementById(stageId).classList.add("active");
+    }
+
+    // 1. FAZA: SLAJDER
+    const track = document.getElementById("track");
+    const handle = document.getElementById("sliderHandle");
+    const progressFill = document.getElementById("sliderProgress");
+    
+    let isDragging = false;
+    let maxReachedIndex = -1; // Spriječava ponavljanje zvuka kod vraćanja unazad
+
+    function resetSliderHandle() {
+      handle.style.left = "4px";
+      progressFill.style.width = "48px";
+      maxReachedIndex = -1;
+      document.querySelectorAll(".letter-node").forEach(n => n.classList.remove("active"));
+    }
+
+    function handleStart(e) {
+      initAllAudio();
+      isDragging = true;
+      handleMove(e);
+    }
+
+    function handleMove(e) {
+      if (!isDragging) return;
+      const rect = track.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const minX = 4;
+      const maxX = rect.width - 52;
+      let currentX = clientX - rect.left - 24;
+
+      if (currentX < minX) currentX = minX;
+      if (currentX > maxX) currentX = maxX;
+
+      handle.style.left = currentX + "px";
+      progressFill.style.width = (currentX + 48) + "px";
+
+      const progress = (currentX - minX) / (maxX - minX);
+      const index = Math.min(Math.floor(progress * graphemes.length), graphemes.length - 1);
+
+      // Mentava provjera - zvuk radi samo kad prst ide prema naprijed
+      if (index > maxReachedIndex) {
+        maxReachedIndex = index;
+        document.querySelectorAll(".letter-node").forEach((n, i) => {
+          if (i === index) {
+            n.classList.add("active");
+            playTone(400 + (i * 80), 0.1);
+            speakText(graphemes[i]);
+          } else if (i < index) {
+            n.classList.remove("active");
+          }
+        });
+      }
+
+      if (progress >= 0.94 && maxReachedIndex === graphemes.length - 1) {
+        isDragging = false;
+        playTone(587.33, 0.15);
+        setTimeout(() => {
+          showStage("stageMic");
+          setTimeout(() => {
+            const bypass = document.getElementById("bypassBtn");
+            if (!document.getElementById("micBtn").classList.contains("success")) {
+              bypass.style.display = "block";
+            }
+          }, 3000);
+        }, 350);
+      }
+    }
+
+    function handleEnd() {
+      if (!isDragging) return;
+      isDragging = false;
+      const rect = track.getBoundingClientRect();
+      const currentPos = parseFloat(handle.style.left || 0);
+      if (currentPos / (rect.width - 52) < 0.94) {
+        resetSliderHandle();
+      }
+    }
+
+    track.addEventListener("mousedown", handleStart);
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mouseup", handleEnd);
+    track.addEventListener("touchstart", handleStart, { passive: true });
+    window.addEventListener("touchmove", handleMove, { passive: true });
+    window.addEventListener("touchend", handleEnd);
+
+    // 2. FAZA: MIKROFON
+    const micBtn = document.getElementById("micBtn");
+    const micStatus = document.getElementById("micStatusText");
+    const heardText = document.getElementById("heardText");
+    const micMysteryImage = document.getElementById("micMysteryImage");
+    const goToSpellBtn = document.getElementById("goToSpellBtn");
+    const bypassBtn = document.getElementById("bypassBtn");
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
+
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.lang = 'hr-HR';
+      recognition.continuous = false;
+      recognition.interimResults = true;
+
+      recognition.onstart = () => {
+        micBtn.className = "mic-button listening";
+        micStatus.innerText = "Slušam te... reci riječ!";
+        heardText.innerText = "";
+      };
+
+      recognition.onresult = (event) => {
+        let transcript = "";
+        for (let i = 0; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        transcript = transcript.trim().toLowerCase();
+        heardText.innerText = `Čujem: "${transcript}"`;
+
+        const target = DATA[currentCategory][wordIndex].word.toLowerCase();
+        if (transcript === target || transcript.includes(target)) {
+          try { recognition.stop(); } catch(e){}
+          onSpeechSuccess();
+        }
+      };
+
+      recognition.onerror = () => {
+        micBtn.className = "mic-button";
+        micStatus.innerText = "Nisam dobro čuo. Probaj opet.";
+        bypassBtn.style.display = "block";
+      };
+
+      recognition.onend = () => {
+        if (!micBtn.classList.contains("success")) {
+          micBtn.classList.remove("listening");
+        }
+      };
+    }
+
+    micBtn.onclick = () => {
+      initAllAudio();
+      if (!SpeechRecognition) {
+        micStatus.innerText = "Mikrofon nije podržan na ovom pretraživaču.";
+        bypassBtn.style.display = "block";
+        return;
+      }
+      try {
+        recognition.start();
+      } catch (err) {
+        recognition.stop();
+        setTimeout(() => { try { recognition.start(); } catch(e){} }, 150);
+      }
+    };
+
+    bypassBtn.onclick = () => onSpeechSuccess();
+
+    function onSpeechSuccess() {
+      micBtn.className = "mic-button success";
+      micBtn.innerText = "✓";
+      micStatus.innerText = "Točno! Bravo!";
+      micMysteryImage.className = "result-display";
+      bypassBtn.style.display = "none";
+      playTone(659.25, 0.2); 
+      speakText(DATA[currentCategory][wordIndex].word);
+      goToSpellBtn.style.display = "block";
+    }
+
+    goToSpellBtn.onclick = () => showStage("stageSpelling");
+
+    // 3. FAZA: SLAGANJE SLOVA
+    function setupSpellingStage() {
+      const slotContainer = document.getElementById("slotContainer");
+      const trayContainer = document.getElementById("trayContainer");
+      slotContainer.innerHTML = "";
+      trayContainer.innerHTML = "";
+      placedLetters = [];
+      document.getElementById("spellStatus").innerText = "Poredaj slova po redu";
+      document.getElementById("restartBtn").style.display = "none";
+
+      graphemes.forEach((_, idx) => {
+        const slot = document.createElement("div");
+        slot.className = "char-box";
+        slot.id = `slot-${idx}`;
+        slotContainer.appendChild(slot);
+      });
+
+      const shuffled = [...graphemes]
+        .map((g) => ({ g, rand: Math.random() }))
+        .sort((a, b) => a.rand - b.rand);
+
+      shuffled.forEach((item, i) => {
+        const tile = document.createElement("div");
+        tile.className = "char-tile";
+        tile.innerText = item.g.toUpperCase();
+        tile.id = `tile-${i}`;
+        tile.onclick = () => onTileClick(tile, item.g);
+        trayContainer.appendChild(tile);
+      });
+    }
+
+    function onTileClick(tile, letter) {
+      if (tile.style.visibility === "hidden") return;
+
+      const nextSlotIndex = placedLetters.length;
+      if (nextSlotIndex >= graphemes.length) return;
+
+      if (letter === graphemes[nextSlotIndex]) {
+        placedLetters.push(letter);
+        tile.style.visibility = "hidden";
+
+        const slot = document.getElementById(`slot-${nextSlotIndex}`);
+        slot.innerText = letter.toUpperCase();
+        slot.classList.add("filled");
+        playTone(520 + (nextSlotIndex * 90), 0.12);
+
+        const isLastLetter = placedLetters.length === graphemes.length;
+
+        if (isLastLetter) {
+          speakText(letter, 0.85, () => {
+            setTimeout(() => {
+              document.getElementById("spellStatus").innerText = "Bravo! Sve je točno!";
+              speakText(DATA[currentCategory][wordIndex].word, 0.85);
+              
+              solvedCount++;
+              updateTracker();
+
+              if (solvedCount >= 5) {
+                setTimeout(() => {
+                  document.getElementById('victory-overlay').style.display = 'flex';
+                  playFanfare();
+                }, 1000);
+              } else {
+                document.getElementById("restartBtn").style.display = "block";
+              }
+            }, 500);
+          });
+        } else {
+          speakText(letter);
+        }
+      } else {
+        playTone(180, 0.2);
+        tile.style.transform = "translateX(-6px)";
+        setTimeout(() => tile.style.transform = "translateX(6px)", 80);
+        setTimeout(() => tile.style.transform = "translateX(0)", 160);
+      }
+    }
+
+    document.getElementById("restartBtn").onclick = () => {
+      document.getElementById("nextWordBtn").click();
+    };
+
+    loadWord();
+  </script>
+</body>
+</html>
