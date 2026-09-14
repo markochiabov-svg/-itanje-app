@@ -481,35 +481,8 @@
       return res;
     }
 
-    // AUDIO INICIJALIZACIJA ZA iOS
+    // AUDIO MREŽA
     let audioCtx = null;
-    let audioUnlocked = false;
-
-    function initAllAudio() {
-      if (audioUnlocked) return;
-      
-      // 1. Otključaj Web Audio
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      try {
-        const buffer = audioCtx.createBuffer(1, 1, 22050);
-        const source = audioCtx.createBufferSource();
-        source.buffer = buffer;
-        source.connect(audioCtx.destination);
-        source.start(0);
-      } catch(e) {}
-
-      // 2. Otključaj Govor (SpeechSynthesis)
-      if ('speechSynthesis' in window) {
-        const silentMsg = new SpeechSynthesisUtterance(' ');
-        silentMsg.lang = 'hr-HR';
-        window.speechSynthesis.speak(silentMsg);
-      }
-      
-      audioUnlocked = true;
-    }
 
     function playTone(freq, dur) {
       if (!audioCtx) return;
@@ -535,7 +508,7 @@
       });
     }
 
-    // FONETSKA MAPA ZA ČISTI IZGOVOR (Maknute točke za lj, nj, dž da ne čita riječi)
+    // FONETSKA MAPA ZA ČISTI IZGOVOR 
     const phonemeMap = {
       'š': 'š.', 'č': 'č.', 'ć': 'ć.', 'ž': 'ž.', 'đ': 'đ.',
       'lj': 'lj', 'nj': 'nj', 'dž': 'dž'
@@ -560,9 +533,24 @@
       window.speechSynthesis.speak(u);
     }
 
+    // POKRETANJE IGRE - EKSPLICITNO BUĐENJE ZVUKA STVARNOM RIJEČI
     function startGame() {
-      initAllAudio(); // OVO PALI ZVUK ZA iOS ODMAH NA PRVI KLIK
+      // 1. Web Audio (Tonovi)
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
       playTone(523.25, 0.15);
+
+      // 2. iOS Govor (Izgovara naglas da trajno otključa mehanizam)
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance("Kreni!");
+        u.lang = 'hr-HR';
+        u.rate = 0.9;
+        window.speechSynthesis.speak(u);
+      }
+
       document.getElementById('start-overlay').style.display = 'none';
       loadWord();
     }
@@ -657,7 +645,7 @@
     const progressFill = document.getElementById("sliderProgress");
     
     let isDragging = false;
-    let maxReachedIndex = -1; // Spriječava ponavljanje zvuka kod vraćanja unazad
+    let maxReachedIndex = -1; 
 
     function resetSliderHandle() {
       handle.style.left = "4px";
@@ -667,7 +655,7 @@
     }
 
     function handleStart(e) {
-      initAllAudio();
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
       isDragging = true;
       handleMove(e);
     }
@@ -689,7 +677,6 @@
       const progress = (currentX - minX) / (maxX - minX);
       const index = Math.min(Math.floor(progress * graphemes.length), graphemes.length - 1);
 
-      // Mentava provjera - zvuk radi samo kad prst ide prema naprijed
       if (index > maxReachedIndex) {
         maxReachedIndex = index;
         document.querySelectorAll(".letter-node").forEach((n, i) => {
@@ -787,7 +774,7 @@
     }
 
     micBtn.onclick = () => {
-      initAllAudio();
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
       if (!SpeechRecognition) {
         micStatus.innerText = "Mikrofon nije podržan na ovom pretraživaču.";
         bypassBtn.style.display = "block";
