@@ -194,22 +194,23 @@
     }
     .stage.active { display: flex; }
 
-    /* ORIGINALNI DIZAJN FAZE 1 (TVOJ KOD S POČETKA) */
+    /* RJEŠENJE ZA FIZIČKI RAZMAK SLOVA */
     .word-preview {
       display: flex;
-      gap: 10px;
+      justify-content: space-between; /* Ovo raspoređuje slova po cijeloj traci! */
+      width: 100%;
+      padding: 0 29px; /* Savršeno poravnava prvo i zadnje slovo s početkom i krajem klizača */
       margin: 20px 0;
       min-height: 70px;
       align-items: center;
-      justify-content: center;
     }
 
     .letter-node {
       font-size: 36px;
       font-weight: 800;
-      padding: 8px 16px;
+      padding: 8px 12px;
       border-radius: 12px;
-      background: #f1f5f9;
+      background: transparent;
       color: #94a3b8;
       transition: all 0.2s ease;
     }
@@ -217,15 +218,15 @@
     .letter-node.active {
       background: var(--primary);
       color: #ffffff;
-      transform: scale(1.15);
+      transform: scale(1.25);
       box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
     }
 
     .track-container {
       width: 100%;
-      height: 52px;
+      height: 58px;
       background: #e2e8f0;
-      border-radius: 26px;
+      border-radius: 29px;
       position: relative;
       margin: 25px 0 15px;
       display: flex;
@@ -352,13 +353,11 @@
 </head>
 <body>
 
-  <!-- Ekran za pokretanje -->
   <div id="start-overlay">
     <div style="font-size: 60px;">🦉</div>
     <button class="main-btn" onclick="initApp()">POKRENI IGRU ▶️</button>
   </div>
 
-  <!-- Karta s progresijom -->
   <div id="map-overlay">
     <h1 style="font-size: 32px; font-weight: 900; margin-bottom: 10px;">Karta Čitanja</h1>
     <p style="color: #94a3b8; margin-bottom: 30px;">Prijeđi sve otoke do blaga!</p>
@@ -377,7 +376,6 @@
     <button class="main-btn" id="playLevelBtn" onclick="startLevel()" style="margin-top: 20px; z-index: 10;">IGRAJ RAZINU</button>
   </div>
 
-  <!-- Pobjednički ekran nakon otoka -->
   <div id="victory-overlay">
     <div style="font-size: 80px; animation: pulse 1s infinite alternate;">🏆</div>
     <h1 style="font-size: 32px; font-weight: 900; color: #eab308; margin: 10px 0;">RAZINA ZAVRŠENA!</h1>
@@ -388,14 +386,13 @@
   <div id="progress-tracker"></div>
   <div class="nav-tabs" id="categoryNav"></div>
 
-  <!-- Glavna kartica s igrom -->
   <div class="card">
     <div class="nav-controls">
       <button class="nav-arrow" id="prevWordBtn">← Prethodna</button>
       <button class="nav-arrow" id="nextWordBtn">Sljedeća →</button>
     </div>
 
-    <!-- 1. FAZA: SLAJDER (Tvoj originalni HTML za slider) -->
+    <!-- 1. FAZA: SLAJDER -->
     <div class="stage active" id="stageSlider">
       <div class="word-preview" id="sliderWordBox"></div>
       <div class="track-container" id="track">
@@ -528,22 +525,28 @@
       });
     }
 
-    const phonemeMap = {
-      'š': 'š.', 'č': 'č.', 'ć': 'ć.', 'ž': 'ž.', 'đ': 'đ.',
-      'lj': 'lj', 'nj': 'nj', 'dž': 'dž'
-    };
-
-    function speakText(text, rate = 0.85, onComplete = null) {
+    // RJEŠENJE ZA IZGOVOR: Svakom slovu dodajemo zarez da bi ga iPad pročitao odvojeno, razgovijetno i čisto!
+    function speakText(text, rate = 0.8, onComplete = null) {
       if (!('speechSynthesis' in window)) {
         if (onComplete) onComplete();
         return;
       }
       window.speechSynthesis.cancel();
-      const cleanText = phonemeMap[text.toLowerCase()] ? phonemeMap[text.toLowerCase()] : text;
+      
+      let cleanText = text.toLowerCase();
+      // Ako se radi o jednom slovu ili dvoglasu, dodajemo zarez!
+      if (cleanText.length <= 2) {
+        cleanText = cleanText + ",";
+      }
+
       const u = new SpeechSynthesisUtterance(cleanText);
       u.lang = 'hr-HR';
-      u.rate = rate;
-      if (onComplete) { u.onend = () => onComplete(); u.onerror = () => onComplete(); }
+      u.rate = rate; // Malo sporije kako bi dijete bolje čulo
+      
+      if (onComplete) { 
+        u.onend = () => onComplete(); 
+        u.onerror = () => onComplete(); 
+      }
       window.speechSynthesis.speak(u);
     }
 
@@ -692,9 +695,9 @@
       document.getElementById(stageId).classList.add("active");
     }
 
-    // =========================================================
-    // ORIGINALNI JAVASCRIPT ZA SLAJDER (100% TVOJ KOD S POČETKA)
-    // =========================================================
+    // =========================================================================
+    // ORIGINALNI TVOJ JS ZA KLIZAČ S POPRAVLJENOM MATEMATIKOM ZA TOČNO VRIJEME
+    // =========================================================================
     
     const track = document.getElementById("track");
     const handle = document.getElementById("sliderHandle");
@@ -717,7 +720,9 @@
       if (!isDragging) return;
       const rect = track.getBoundingClientRect();
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      let pos = clientX - rect.left - 29;
+      
+      // 58 je promjer zvjezdice, 29 je polumjer (centar)
+      let pos = clientX - rect.left - 29; 
       const maxPos = rect.width - 58;
 
       if (pos < 0) pos = 0;
@@ -725,8 +730,16 @@
 
       handle.style.left = `${pos}px`;
 
+      // Progress ide od 0 do 1 (0 = sami početak, 1 = sami kraj)
       const progress = pos / maxPos;
-      const index = Math.min(Math.floor(progress * graphemes.length), graphemes.length - 1);
+
+      // Rješenje za pravovremeno izgovaranje:
+      // Budući da su slova razvučena od ruba do ruba (space-between), 
+      // koristimo Math.round da slovo okine točno kad je klizač iznad njega!
+      let index = 0;
+      if (graphemes.length > 1) {
+        index = Math.round(progress * (graphemes.length - 1));
+      }
 
       if (index !== lastActiveIndex && index >= 0) {
         lastActiveIndex = index;
@@ -741,7 +754,7 @@
         });
       }
 
-      if (progress >= 0.96) {
+      if (progress >= 0.98) {
         isDragging = false;
         playTone(587.33, 0.15);
         setTimeout(() => {
@@ -761,7 +774,7 @@
       isDragging = false;
       const rect = track.getBoundingClientRect();
       const currentPos = parseFloat(handle.style.left || 0);
-      if (currentPos / (rect.width - 58) < 0.95) {
+      if (currentPos / (rect.width - 58) < 0.94) {
         resetSliderHandle();
       }
     }
@@ -773,7 +786,7 @@
     window.addEventListener("touchmove", handleMove, { passive: true });
     window.addEventListener("touchend", handleEnd);
 
-    // =========================================================
+    // =========================================================================
 
     // 2. FAZA: MIKROFON
     const micBtn = document.getElementById("micBtn");
@@ -850,7 +863,8 @@
       micMysteryImage.className = "result-display";
       bypassBtn.style.display = "none";
       playTone(659.25, 0.2); 
-      speakText(DATA[currentCategory][wordIndex].word);
+      // Za cijelu riječ nema zareza, čita se normalno!
+      speakText(DATA[currentCategory][wordIndex].word, 0.85);
       goToSpellBtn.style.display = "block";
     }
 
@@ -905,9 +919,10 @@
         const isLastLetter = placedLetters.length === graphemes.length;
 
         if (isLastLetter) {
-          speakText(letter, 0.85, () => {
+          speakText(letter, 0.80, () => {
             setTimeout(() => {
               document.getElementById("spellStatus").innerText = "Bravo! Sve je točno!";
+              // Čitanje cijele riječi na kraju
               speakText(DATA[currentCategory][wordIndex].word, 0.85);
               
               solvedInLevel++;
@@ -924,7 +939,7 @@
             }, 500);
           });
         } else {
-          speakText(letter);
+          speakText(letter, 0.80);
         }
       } else {
         playTone(180, 0.2);
@@ -933,7 +948,8 @@
         setTimeout(() => tile.style.transform = "translateX(0)", 160);
         
         setTimeout(() => {
-          speakText("Pokušaj ponovno");
+          // Za rečenicu nema zareza
+          speakText("Pokušaj ponovno", 0.85);
           document.getElementById("spellStatus").innerText = "Ups! Idemo ispočetka!";
           placedLetters = []; 
           
