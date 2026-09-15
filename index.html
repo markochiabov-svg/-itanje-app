@@ -200,7 +200,6 @@
       display: flex;
       justify-content: space-between;
       width: 100%;
-      /* Ostavlja točno 28px s obje strane kako bi prvo slovo bilo na nuli hoda, a zadnje na 100% hoda zvjezdice */
       padding: 0 28px; 
       margin: 20px 0;
       min-height: 70px;
@@ -221,6 +220,7 @@
       text-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
     }
 
+    /* Blokiramo scroll na elementima klizača */
     .track-container {
       width: 100%;
       height: 56px;
@@ -231,7 +231,7 @@
       display: flex;
       align-items: center;
       padding: 4px;
-      touch-action: none;
+      touch-action: none !important;
     }
     
     #sliderProgress {
@@ -257,7 +257,7 @@
       justify-content: center;
       font-size: 24px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      touch-action: none;
+      touch-action: none !important;
     }
 
     /* FAZA 2 - Mikrofon */
@@ -367,7 +367,7 @@
     <button class="main-btn" onclick="initApp()">POKRENI IGRU ▶️</button>
   </div>
 
-  <!-- Karta s progresijom (Novi Svijet) -->
+  <!-- Karta s progresijom -->
   <div id="map-overlay">
     <h1 style="font-size: 32px; font-weight: 900; margin-bottom: 10px;">Karta Čitanja</h1>
     <p style="color: #94a3b8; margin-bottom: 30px;">Prijeđi sve otoke do blaga!</p>
@@ -386,7 +386,7 @@
     <button class="main-btn" id="playLevelBtn" onclick="startLevel()" style="margin-top: 20px; z-index: 10;">IGRAJ RAZINU</button>
   </div>
 
-  <!-- Pobjednički ekran nakon pojedinog otoka -->
+  <!-- Pobjednički ekran nakon otoka -->
   <div id="victory-overlay">
     <div style="font-size: 80px; animation: pulse 1s infinite alternate;">🏆</div>
     <h1 style="font-size: 32px; font-weight: 900; color: #eab308; margin: 10px 0;">RAZINA ZAVRŠENA!</h1>
@@ -394,10 +394,7 @@
     <button class="main-btn" onclick="returnToMap()">NASTAVI NA KARTU 🗺️</button>
   </div>
 
-  <!-- Traka napretka -->
   <div id="progress-tracker"></div>
-
-  <!-- Kategorije -->
   <div class="nav-tabs" id="categoryNav"></div>
 
   <!-- Glavna kartica s igrom -->
@@ -717,21 +714,28 @@
       document.querySelectorAll(".letter-node").forEach(n => n.classList.remove("active"));
     }
 
+    // ==========================================
+    // NOVA LOGIKA ZA KLIZAČ (POINTER EVENTS)
+    // ==========================================
+
     function handleStart(e) {
       if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
       isDragging = true;
+      
+      // Pointer Capture zaključava prst za zvjezdicu kako se dodir ne bi prekinuo!
+      if (e.pointerId) {
+        try { track.setPointerCapture(e.pointerId); } catch(err) {}
+      }
+      
       handleMove(e);
     }
 
-    // NOVA OPTIMIZIRANA LOGIKA (BEZ RUŠENJA DOM-a I SA ZAŠTITOM OD SCROLLA)
     function handleMove(e) {
       if (!isDragging) return;
       
-      // Sprječava Safariju da ukrade dodir kao "scroll" akciju!
-      if (e.cancelable) e.preventDefault(); 
-
       const rect = track.getBoundingClientRect();
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientX = e.clientX; // PointerEvent uvijek ima ispravan clientX!
+      
       const minX = 4;
       const maxX = rect.width - 52;
       let currentX = clientX - rect.left - 24;
@@ -742,10 +746,9 @@
       handle.style.left = currentX + "px";
       progressFill.style.width = (currentX + 48) + "px";
 
-      // Progress ide strogo od 0.0 (početak) do 1.0 (kraj)
       const progress = (currentX - minX) / (maxX - minX);
 
-      // Matematički izračunavamo ispod kojeg smo točno slova (umjesto čitanja DOM-a)
+      // Matematički izračun ispod kojeg smo slova
       let index = -1;
       const numLetters = graphemes.length;
       if (numLetters > 1) {
@@ -770,7 +773,7 @@
         });
       }
 
-      // Ako je došao do samog kraja, prebaci fazu
+      // Kraj - prelazak na iduću fazu
       if (progress >= 0.98) {
         isDragging = false;
         playTone(587.33, 0.15);
@@ -786,24 +789,28 @@
       }
     }
 
-    function handleEnd() {
+    function handleEnd(e) {
       if (!isDragging) return;
       isDragging = false;
+      
+      if (e.pointerId && track.hasPointerCapture(e.pointerId)) {
+        try { track.releasePointerCapture(e.pointerId); } catch(err) {}
+      }
+
       const rect = track.getBoundingClientRect();
       const currentPos = parseFloat(handle.style.left || 0);
-      // Ako korisnik pusti prije 94%, zvjezdica se vraća na početak
       if (currentPos / (rect.width - 52) < 0.94) {
         resetSliderHandle();
       }
     }
 
-    // Registracija dodira s { passive: false } da allow-a preventDefault()!
-    track.addEventListener("mousedown", handleStart);
-    window.addEventListener("mousemove", handleMove, { passive: false });
-    window.addEventListener("mouseup", handleEnd);
-    track.addEventListener("touchstart", handleStart, { passive: false });
-    window.addEventListener("touchmove", handleMove, { passive: false });
-    window.addEventListener("touchend", handleEnd);
+    // Registracija jedinstvenih Pointer događaja (standard za iOS i ostale uređaje)
+    track.addEventListener("pointerdown", handleStart);
+    window.addEventListener("pointermove", handleMove);
+    window.addEventListener("pointerup", handleEnd);
+    window.addEventListener("pointercancel", handleEnd);
+
+    // ==========================================
 
     // 2. FAZA: MIKROFON
     const micBtn = document.getElementById("micBtn");
