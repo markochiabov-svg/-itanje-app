@@ -40,8 +40,40 @@
       overflow-x: hidden;
     }
 
+    /* Sovica Suputnik */
+    .owl-companion {
+      position: fixed;
+      top: 15px;
+      right: 20px;
+      font-size: 45px;
+      z-index: 50;
+      transition: all 0.3s ease;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));
+    }
+    .owl-sleep { opacity: 0.7; transform: scale(0.9) rotate(-15deg); filter: grayscale(50%); }
+    .owl-dance { animation: owlBounce 0.4s infinite alternate; }
+    
+    @keyframes owlBounce {
+      from { transform: translateY(0); }
+      to { transform: translateY(-12px) scale(1.1); }
+    }
+
+    /* Konfeti */
+    .confetti {
+      position: fixed;
+      top: -10px;
+      width: 12px;
+      height: 12px;
+      z-index: 200;
+      animation: fall linear forwards;
+      border-radius: 2px;
+    }
+    @keyframes fall {
+      to { transform: translateY(110vh) rotate(720deg); }
+    }
+
     /* Overlays */
-    #start-overlay, #victory-overlay, #map-overlay {
+    #start-overlay, #victory-overlay, #map-overlay, #album-overlay {
       position: fixed;
       inset: 0;
       background: var(--bg);
@@ -50,44 +82,73 @@
       align-items: center;
       justify-content: center;
       z-index: 100;
-      gap: 20px;
+      gap: 15px;
     }
     #victory-overlay {
       display: none;
-      background: rgba(248, 250, 252, 0.96);
+      background: rgba(248, 250, 252, 0.98);
       text-align: center;
       padding: 20px;
       z-index: 105;
     }
-    #map-overlay {
-      display: none;
-      background: #0f172a;
-      color: white;
-    }
+    #map-overlay { display: none; background: #0f172a; color: white; }
+    #album-overlay { display: none; background: #fffbeb; z-index: 110; }
 
     .main-btn {
       background: var(--success);
       color: white;
       border: none;
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 900;
-      padding: 18px 36px;
+      padding: 16px 32px;
       border-radius: 24px;
       box-shadow: 0 6px 0 #15803d;
       cursor: pointer;
+      margin: 5px;
     }
-    .main-btn:active {
-      transform: translateY(4px);
-      box-shadow: 0 2px 0 #15803d;
+    .main-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #15803d; }
+    
+    .secondary-btn {
+      background: #facc15;
+      color: #854d0e;
+      box-shadow: 0 6px 0 #ca8a04;
+    }
+    .secondary-btn:active { box-shadow: 0 2px 0 #ca8a04; }
+
+    /* Album s naljepnicama */
+    .album-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin: 20px 0;
+      padding: 20px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    .sticker-slot {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: #f1f5f9;
+      border: 3px dashed #cbd5e1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 35px;
+      opacity: 0.5;
+      filter: grayscale(100%);
+    }
+    .sticker-slot.unlocked {
+      border: 3px solid #facc15;
+      background: #fef08a;
+      opacity: 1;
+      filter: none;
+      animation: pulseNode 2s infinite;
     }
 
     /* Dizajn karte */
-    .map-container {
-      position: relative;
-      width: 300px;
-      height: 420px;
-      margin: 20px 0;
-    }
+    .map-container { position: relative; width: 300px; height: 420px; margin: 10px 0; }
     .map-node {
       position: absolute;
       width: 64px;
@@ -107,11 +168,18 @@
     .map-node.unlocked { background: var(--primary); color: white; border-color: #60a5fa; }
     .map-node.active { background: var(--success); color: white; border-color: #4ade80; animation: pulseNode 1.5s infinite; transform: scale(1.15); }
     .map-node.completed { background: #facc15; border-color: #eab308; }
+    .map-node.shake { animation: shakeChest 2s infinite; }
     
     @keyframes pulseNode {
-      0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
-      70% { box-shadow: 0 0 0 15px rgba(74, 222, 128, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+      0% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.7); }
+      70% { box-shadow: 0 0 0 15px rgba(250, 204, 21, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0); }
+    }
+    @keyframes shakeChest {
+      0%, 100% { transform: translateX(-50%) rotate(0); }
+      5%, 15%, 25% { transform: translateX(-50%) rotate(-10deg); }
+      10%, 20%, 30% { transform: translateX(-50%) rotate(10deg); }
+      35% { transform: translateX(-50%) rotate(0); }
     }
 
     #node-0 { bottom: 0; left: 10%; }
@@ -120,12 +188,12 @@
     #node-3 { bottom: 70%; right: 15%; }
     #node-4 { top: 0; left: 50%; transform: translateX(-50%); font-size: 34px;}
 
-    /* Traka napretka (Krugovi) */
+    /* Traka napretka */
     #progress-tracker {
       display: flex;
       gap: 10px;
-      margin-top: 10px;
-      margin-bottom: 20px;
+      margin-top: 25px;
+      margin-bottom: 15px;
       align-items: center;
       flex-wrap: wrap;
       justify-content: center;
@@ -138,12 +206,7 @@
       border: 3px solid #cbd5e1;
       transition: all 0.3s ease;
     }
-    .progress-dot.active {
-      background: #facc15;
-      border-color: #eab308;
-      box-shadow: 0 0 10px rgba(250, 204, 21, 0.6);
-      transform: scale(1.2);
-    }
+    .progress-dot.active { background: #facc15; border-color: #eab308; box-shadow: 0 0 10px rgba(250, 204, 21, 0.6); transform: scale(1.2); }
 
     .card {
       background: var(--card-bg);
@@ -157,12 +220,7 @@
       align-items: center;
     }
 
-    .stage {
-      display: none;
-      width: 100%;
-      flex-direction: column;
-      align-items: center;
-    }
+    .stage { display: none; width: 100%; flex-direction: column; align-items: center; }
     .stage.active { display: flex; }
 
     /* FIZIČKI RAZMAK SLOVA */
@@ -170,7 +228,7 @@
       display: flex;
       justify-content: space-between; 
       width: 100%;
-      padding: 0 29px; /* Savršeno poravnava prvo i zadnje slovo s početkom i krajem klizača */
+      padding: 0 29px; 
       margin: 20px 0;
       min-height: 70px;
       align-items: center;
@@ -185,13 +243,7 @@
       color: #94a3b8;
       transition: all 0.2s ease;
     }
-
-    .letter-node.active {
-      background: var(--primary);
-      color: #ffffff;
-      transform: scale(1.25);
-      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
-    }
+    .letter-node.active { background: var(--primary); color: #ffffff; transform: scale(1.25); box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4); }
 
     .track-container {
       width: 100%;
@@ -260,74 +312,41 @@
     .heard-text { font-size: 15px; color: #0ea5e9; font-style: italic; min-height: 20px; margin-bottom: 8px; }
 
     /* FAZA 3 - Slaganje */
-    .slot-container, .tray-container {
-      display: flex;
-      gap: 10px;
-      margin: 15px 0;
-      min-height: 60px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
+    .slot-container, .tray-container { display: flex; gap: 10px; margin: 15px 0; min-height: 60px; flex-wrap: wrap; justify-content: center; }
     .char-box {
-      width: 56px;
-      height: 56px;
-      border-radius: 12px;
-      background: #e2e8f0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 26px;
-      font-weight: bold;
-      border: 2px dashed #94a3b8;
+      width: 56px; height: 56px; border-radius: 12px; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: bold; border: 2px dashed #94a3b8;
     }
-    .char-box.filled {
-      border: none;
-      background: var(--primary);
-      color: #ffffff;
-    }
+    .char-box.filled { border: none; background: var(--primary); color: #ffffff; }
 
     .char-tile {
-      width: 56px;
-      height: 56px;
-      border-radius: 12px;
-      background: #ffffff;
-      border: 2px solid #cbd5e1;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 26px;
-      font-weight: bold;
-      cursor: pointer;
+      width: 56px; height: 56px; border-radius: 12px; background: #ffffff; border: 2px solid #cbd5e1; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: bold; cursor: pointer;
     }
     .char-tile:active { transform: translateY(4px); box-shadow: 0 0 0 #cbd5e1; }
 
-    .action-btn {
-      background: var(--success);
-      color: white;
-      border: none;
-      padding: 12px 28px;
-      border-radius: 14px;
-      font-size: 18px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 12px;
-      display: none;
-    }
-    .bypass-btn {
-      background: transparent; border: none; color: #94a3b8; font-size: 13px; text-decoration: underline; cursor: pointer; margin-top: 8px; display: none;
-    }
-
+    .action-btn { background: var(--success); color: white; border: none; padding: 12px 28px; border-radius: 14px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 12px; display: none; }
+    .bypass-btn { background: transparent; border: none; color: #94a3b8; font-size: 13px; text-decoration: underline; cursor: pointer; margin-top: 8px; display: none; }
     .nav-controls { display: flex; justify-content: space-between; width: 100%; margin-top: 15px; }
     .nav-arrow { background: transparent; border: 1px solid #cbd5e1; padding: 6px 14px; border-radius: 10px; color: #64748b; font-size: 14px; cursor: pointer; }
   </style>
 </head>
 <body>
 
+  <div id="owlCompanion" class="owl-companion">🦉</div>
+
   <!-- Ekran za pokretanje -->
   <div id="start-overlay">
-    <div style="font-size: 60px;">🦉</div>
+    <div style="font-size: 70px; margin-bottom: -10px;">🦉</div>
+    <h1 style="color: var(--primary); margin: 0 0 20px 0;">Nauči Čitati</h1>
     <button class="main-btn" onclick="initApp()">POKRENI IGRU ▶️</button>
+    <button class="main-btn secondary-btn" onclick="openAlbum()">MOJ ALBUM 📙</button>
+  </div>
+
+  <!-- Album Overlay -->
+  <div id="album-overlay">
+    <h1 style="color: #ca8a04; font-size: 36px; margin: 0;">Album Naljepnica</h1>
+    <p style="color: #713f12;">Skupi ih sve prelazeći otoke!</p>
+    <div class="album-grid" id="albumGrid"></div>
+    <button class="main-btn" onclick="closeAlbum()">NATRAG</button>
   </div>
 
   <!-- Karta s progresijom -->
@@ -343,7 +362,7 @@
       <div class="map-node" id="node-1">2</div>
       <div class="map-node" id="node-2">3</div>
       <div class="map-node" id="node-3">4</div>
-      <div class="map-node" id="node-4">👑</div>
+      <div class="map-node shake" id="node-4">🧰</div> <!-- Škrinja -->
     </div>
     
     <button class="main-btn" id="playLevelBtn" onclick="startLevel()" style="margin-top: 20px; z-index: 10;">IGRAJ RAZINU</button>
@@ -351,16 +370,16 @@
 
   <!-- Pobjednički ekran nakon otoka -->
   <div id="victory-overlay">
-    <div style="font-size: 80px; animation: pulse 1s infinite alternate;">🏆</div>
-    <h1 style="font-size: 32px; font-weight: 900; color: #eab308; margin: 10px 0;">RAZINA ZAVRŠENA!</h1>
-    <p style="font-size: 18px; color: #475569; max-width: 280px; margin-bottom: 20px;">Sjajno si pročitao sve riječi!</p>
+    <div id="rewardEmoji" style="font-size: 90px; animation: owlBounce 0.5s infinite alternate;">🎁</div>
+    <h1 style="font-size: 32px; font-weight: 900; color: #eab308; margin: 10px 0;">NOVA NALJEPNICA!</h1>
+    <p style="font-size: 18px; color: #475569; max-width: 280px; margin-bottom: 20px;">Odlično si pročitao sve riječi i osvojio nagradu!</p>
     <button class="main-btn" onclick="returnToMap()">NASTAVI NA KARTU 🗺️</button>
   </div>
 
   <div id="progress-tracker"></div>
 
   <!-- Glavna kartica s igrom -->
-  <div class="card">
+  <div class="card" id="gameCard" style="display: none;">
     <div class="nav-controls">
       <button class="nav-arrow" id="prevWordBtn">← Prethodna</button>
       <button class="nav-arrow" id="nextWordBtn">Sljedeća →</button>
@@ -396,49 +415,85 @@
   </div>
 
   <script>
-    // MASIVNA BAZA RIJEČI (Nema više kategorija, sve se miješa po duljini!)
+    // MASIVNA BAZA RIJEČI (Miješa se po dužini!)
     const ALL_WORDS = [
-      // 3 Slova (Graphemes)
       { word: "vuk", icon: "🐺" }, { word: "pas", icon: "🐶" }, { word: "lav", icon: "🦁" },
       { word: "miš", icon: "🐭" }, { word: "rak", icon: "🦀" }, { word: "duh", icon: "👻" },
       { word: "oko", icon: "👁️" }, { word: "uho", icon: "👂" }, { word: "nos", icon: "👃" },
       { word: "zub", icon: "🦷" }, { word: "sir", icon: "🧀" }, { word: "med", icon: "🍯" },
       { word: "sok", icon: "🧃" }, { word: "jež", icon: "🦔" }, { word: "luk", icon: "🧅" },
       { word: "zec", icon: "🐇" }, { word: "zid", icon: "🧱" }, { word: "konj", icon: "🐴" },
-      { word: "puž", icon: "🐌" }, { word: "crv", icon: "🐛" },
-      
-      // 4 Slova
       { word: "riba", icon: "🐟" }, { word: "koza", icon: "🐐" }, { word: "sova", icon: "🦉" },
       { word: "pauk", icon: "🕷️" }, { word: "kost", icon: "🦴" }, { word: "mrak", icon: "🌑" },
       { word: "ruka", icon: "✋" }, { word: "noga", icon: "🦶" }, { word: "kruh", icon: "🍞" },
       { word: "meso", icon: "🥩" }, { word: "jaje", icon: "🥚" }, { word: "voda", icon: "💧" },
       { word: "pita", icon: "🥧" }, { word: "vlak", icon: "🚂" }, { word: "brod", icon: "🚢" },
       { word: "zmaj", icon: "🐉" }, { word: "drvo", icon: "🌳" }, { word: "stol", icon: "🪑" },
-      { word: "srce", icon: "❤️" }, { word: "ključ", icon: "🔑" },
-      
-      // 5 Slova
       { word: "krava", icon: "🐄" }, { word: "bager", icon: "🚜" }, { word: "avion", icon: "✈️" },
       { word: "čamac", icon: "🛶" }, { word: "kotao", icon: "🥣" }, { word: "torta", icon: "🎂" },
-      { word: "balon", icon: "🎈" }, { word: "oblak", icon: "☁️" }, { word: "knjiga", icon: "📖" },
-      { word: "ptica", icon: "🐦" }, { word: "lopta", icon: "⚽" }, { word: "sunce", icon: "☀️" },
-      { word: "mrkva", icon: "🥕" }, { word: "vatra", icon: "🔥" }, { word: "pismo", icon: "✉️" },
-      
-      // 6 Slova
+      { word: "balon", icon: "🎈" }, { word: "oblak", icon: "☁️" }, { word: "ptica", icon: "🐦" },
+      { word: "lopta", icon: "⚽" }, { word: "sunce", icon: "☀️" }, { word: "vatra", icon: "🔥" },
       { word: "dvorac", icon: "🏰" }, { word: "jabuka", icon: "🍎" }, { word: "olovka", icon: "✏️" },
       { word: "leptir", icon: "🦋" }, { word: "krevet", icon: "🛏️" }, { word: "prozor", icon: "🪟" },
-      { word: "majmun", icon: "🐒" }, { word: "jastuk", icon: "🛌" }, { word: "cipela", icon: "👞" },
-      { word: "cvijet", icon: "🌸" }
+      { word: "majmun", icon: "🐒" }, { word: "cipela", icon: "👞" }, { word: "cvijet", icon: "🌸" }
     ];
+
+    // ZVUČNE NAGRADE ZA ZABAVU NA KRAJU RIJEČI
+    const SOUND_REACTIONS = {
+      "pas": "Vau vau!", "krava": "Muuu!", "auto": "Bip bip!", "vlak": "Ču ču!",
+      "lav": "Rrrrr!", "miš": "Skvik skvik!", "duh": "Buuuu!", "sova": "Huu huu!",
+      "zmaj": "Rrrrr!", "ptica": "Fiju fiju!", "brod": "Tu tuuu!"
+    };
+
+    // NALJEPNICE
+    const STICKER_PACK = ["🦖", "🚀", "🤖", "🚜", "🏎️", "🦄", "🦕", "🚁", "⛵", "🛸"];
+    let unlockedStickers = JSON.parse(localStorage.getItem('jakovStickers')) || [];
 
     let currentLevelWords = [];
     let wordIndex = 0;
     let graphemes = [];
     let placedLetters = [];
-    
     let currentMapLevel = 0; 
     let solvedInLevel = 0;
 
-    // Kako igra odmiče, traži se više riječi po otoku
+    // ŽIVA SOVICA LOGIKA
+    let owlCompanion = document.getElementById('owlCompanion');
+    let owlTimer;
+    
+    function resetOwl() {
+      owlCompanion.innerText = "🦉";
+      owlCompanion.className = "owl-companion";
+      clearTimeout(owlTimer);
+      owlTimer = setTimeout(() => {
+        owlCompanion.innerText = "💤";
+        owlCompanion.classList.add("owl-sleep");
+      }, 10000); // Sovica zaspe nakon 10 sekundi neaktivnosti
+    }
+
+    // Probudite sovicu na svaki dodir ekrana
+    window.addEventListener('touchstart', resetOwl, {passive: true});
+    window.addEventListener('mousedown', resetOwl);
+
+    function triggerOwlDance() {
+      owlCompanion.innerText = "🎶";
+      owlCompanion.classList.add("owl-dance");
+      setTimeout(resetOwl, 3000);
+    }
+
+    // KONFETI EFEKT
+    function shootConfetti() {
+      const colors = ['#ef4444', '#3b82f6', '#22c55e', '#facc15', '#a855f7'];
+      for(let i=0; i<70; i++) {
+        let conf = document.createElement('div');
+        conf.className = 'confetti';
+        conf.style.left = Math.random() * 100 + 'vw';
+        conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        conf.style.animationDuration = (Math.random() * 2 + 2) + 's';
+        document.body.appendChild(conf);
+        setTimeout(() => conf.remove(), 4000);
+      }
+    }
+
     function getTargetForLevel() { return 3 + currentMapLevel; }
 
     function splitGraphemes(word) {
@@ -508,8 +563,6 @@
       });
     }
 
-    // ORIGINALNI RJEČNIK IZGOVORA - BEZ ZAREZA
-    // Dodano samo slovo "c" s točkom da bi ga zvučalo čisto
     const phonemeMap = {
       'š': 'š.', 'č': 'č.', 'ć': 'ć.', 'ž': 'ž.', 'đ': 'đ.', 'c': 'c.',
       'lj': 'lj', 'nj': 'nj', 'dž': 'dž'
@@ -529,8 +582,32 @@
       window.speechSynthesis.speak(u);
     }
 
+    // ALBUM
+    function openAlbum() {
+      document.getElementById('album-overlay').style.display = 'flex';
+      const grid = document.getElementById('albumGrid');
+      grid.innerHTML = "";
+      
+      STICKER_PACK.forEach(sticker => {
+        let slot = document.createElement("div");
+        slot.className = "sticker-slot";
+        if(unlockedStickers.includes(sticker)) {
+          slot.innerText = sticker;
+          slot.classList.add("unlocked");
+        } else {
+          slot.innerText = "🔒";
+        }
+        grid.appendChild(slot);
+      });
+    }
+    
+    function closeAlbum() {
+      document.getElementById('album-overlay').style.display = 'none';
+    }
+
     function initApp() {
       initAllAudio();
+      resetOwl();
       playTone(523.25, 0.15);
       document.getElementById('start-overlay').style.display = 'none';
       renderMap();
@@ -541,14 +618,15 @@
       for(let i=0; i<5; i++) {
         const node = document.getElementById(`node-${i}`);
         node.className = "map-node";
+        
         if (i < currentMapLevel) {
           node.classList.add("completed");
-          if(i === 4) node.innerText = "👑"; else node.innerText = "✓";
+          if(i === 4) node.innerText = "💎"; else node.innerText = "✓";
         } else if (i === currentMapLevel) {
           node.classList.add("active");
-          if(i === 4) node.innerText = "👑"; else node.innerText = (i+1).toString();
+          if(i === 4) { node.innerText = "🧰"; node.classList.add("shake"); } else node.innerText = (i+1).toString();
         } else {
-          if(i === 4) node.innerText = "👑"; else node.innerText = (i+1).toString();
+          if(i === 4) { node.innerText = "🧰"; node.classList.add("shake"); } else node.innerText = (i+1).toString();
         }
       }
       
@@ -565,6 +643,7 @@
     function startLevel() {
       if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
       document.getElementById('map-overlay').style.display = 'none';
+      document.getElementById('gameCard').style.display = 'flex';
       solvedInLevel = 0;
       
       const target = getTargetForLevel();
@@ -576,7 +655,6 @@
         tracker.appendChild(dot);
       }
       
-      // LOGIKA ZA POSTEPENO DODAVANJE DUŽIH RIJEČI
       let allowedLengths = [];
       if (currentMapLevel === 0) allowedLengths = [3];
       else if (currentMapLevel === 1) allowedLengths = [3, 4];
@@ -584,16 +662,12 @@
       else if (currentMapLevel === 3) allowedLengths = [4, 5];
       else if (currentMapLevel >= 4) allowedLengths = [5, 6];
 
-      // Filtriramo bazu riječi po dozvoljenoj dužini za ovu razinu
       let pool = ALL_WORDS.filter(item => {
         let len = splitGraphemes(item.word).length;
         return allowedLengths.includes(len);
       });
 
-      // Promiješamo riječi
       pool.sort(() => Math.random() - 0.5);
-
-      // Izvučemo točan broj riječi potreban za prelazak otoka
       currentLevelWords = pool.slice(0, target);
       wordIndex = 0;
 
@@ -613,6 +687,7 @@
       currentMapLevel++;
       renderMap();
       document.getElementById('map-overlay').style.display = 'flex';
+      document.getElementById('gameCard').style.display = 'none';
     }
 
     document.getElementById("prevWordBtn").onclick = () => {
@@ -667,10 +742,7 @@
       document.getElementById(stageId).classList.add("active");
     }
 
-    // =========================================================================
-    // ORIGINALNI TVOJ JS ZA KLIZAČ S POPRAVLJENOM MATEMATIKOM ZA TOČNO VRIJEME
-    // =========================================================================
-    
+    // ORIGINALNA MEHANIKA KLIZAČA
     const track = document.getElementById("track");
     const handle = document.getElementById("sliderHandle");
     let isDragging = false;
@@ -693,7 +765,6 @@
       const rect = track.getBoundingClientRect();
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       
-      // 58 je promjer zvjezdice, 29 je polumjer (centar)
       let pos = clientX - rect.left - 29; 
       const maxPos = rect.width - 58;
 
@@ -702,11 +773,7 @@
 
       handle.style.left = `${pos}px`;
 
-      // Progress ide od 0 do 1 (0 = sami početak, 1 = sami kraj)
       const progress = pos / maxPos;
-
-      // Budući da su slova razvučena od ruba do ruba (space-between), 
-      // koristimo Math.round da slovo okine točno kad je klizač iznad njega!
       let index = 0;
       if (graphemes.length > 1) {
         index = Math.round(progress * (graphemes.length - 1));
@@ -756,8 +823,6 @@
     track.addEventListener("touchstart", handleStart, { passive: true });
     window.addEventListener("touchmove", handleMove, { passive: true });
     window.addEventListener("touchend", handleEnd);
-
-    // =========================================================================
 
     // 2. FAZA: MIKROFON
     const micBtn = document.getElementById("micBtn");
@@ -840,7 +905,7 @@
 
     goToSpellBtn.onclick = () => showStage("stageSpelling");
 
-    // 3. FAZA: SLAGANJE SLOVA (ZADRŽAN RESET NA GREŠKU)
+    // 3. FAZA: SLAGANJE SLOVA (DODANA LOGIKA ZA NAGRADE)
     function setupSpellingStage() {
       const slotContainer = document.getElementById("slotContainer");
       const trayContainer = document.getElementById("trayContainer");
@@ -891,17 +956,40 @@
         if (isLastLetter) {
           speakText(letter, 0.85, () => {
             setTimeout(() => {
+              const fullWord = currentLevelWords[wordIndex].word;
               document.getElementById("spellStatus").innerText = "Bravo! Sve je točno!";
-              speakText(currentLevelWords[wordIndex].word, 0.85);
+              
+              // ZVUČNE NAGRADE!
+              const reaction = SOUND_REACTIONS[fullWord.toLowerCase()];
+              
+              speakText(fullWord, 0.85, () => {
+                if(reaction) {
+                   setTimeout(() => { speakText(reaction, 0.95); }, 200);
+                }
+              });
+
+              triggerOwlDance(); // Sovica pleše!
               
               solvedInLevel++;
               updateTracker();
 
               if (solvedInLevel >= getTargetForLevel()) {
                 setTimeout(() => {
+                  
+                  // DODJELA NALJEPNICE
+                  let newSticker = STICKER_PACK[Math.floor(Math.random() * STICKER_PACK.length)];
+                  if(!unlockedStickers.includes(newSticker)) {
+                    unlockedStickers.push(newSticker);
+                    localStorage.setItem('jakovStickers', JSON.stringify(unlockedStickers));
+                  }
+                  
+                  document.getElementById('rewardEmoji').innerText = newSticker;
                   document.getElementById('victory-overlay').style.display = 'flex';
+                  
+                  shootConfetti(); // Konfeti!
                   playFanfare();
-                }, 1000);
+                  
+                }, 1500); // Malo duža pauza da čuje životinju prije konfeta
               } else {
                 document.getElementById("restartBtn").style.display = "block";
               }
