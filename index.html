@@ -17,7 +17,7 @@
       --primary: #3b82f6;
       --success: #22c55e;
       --danger: #ef4444;
-      --radius: 24px;
+      --radius: 20px;
     }
 
     * {
@@ -114,7 +114,6 @@
       100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
     }
 
-    /* Pozicije otoka */
     #node-0 { bottom: 0; left: 10%; }
     #node-1 { bottom: 20%; right: 10%; }
     #node-2 { bottom: 45%; left: 15%; }
@@ -178,9 +177,9 @@
     .card {
       background: var(--card-bg);
       border-radius: var(--radius);
-      box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.06);
       width: 100%;
-      max-width: 440px;
+      max-width: 500px;
       padding: 24px;
       display: flex;
       flex-direction: column;
@@ -195,84 +194,76 @@
     }
     .stage.active { display: flex; }
 
-    /* MATEMATIČKI SAVRŠEN RAZMAK SLOVA */
+    /* ORIGINALNI DIZAJN FAZE 1 (TVOJ KOD S POČETKA) */
     .word-preview {
       display: flex;
-      justify-content: space-between;
-      width: 100%;
-      padding: 0 28px; 
+      gap: 10px;
       margin: 20px 0;
       min-height: 70px;
       align-items: center;
+      justify-content: center;
     }
 
     .letter-node {
-      font-size: 40px;
-      font-weight: 900;
-      padding: 8px 0px;
+      font-size: 36px;
+      font-weight: 800;
+      padding: 8px 16px;
       border-radius: 12px;
+      background: #f1f5f9;
       color: #94a3b8;
-      transition: all 0.15s ease;
+      transition: all 0.2s ease;
     }
+
     .letter-node.active {
-      color: var(--primary);
-      transform: scale(1.25) translateY(-6px);
-      text-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      background: var(--primary);
+      color: #ffffff;
+      transform: scale(1.15);
+      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
     }
 
     .track-container {
       width: 100%;
-      height: 56px;
+      height: 52px;
       background: #e2e8f0;
-      border-radius: 28px;
+      border-radius: 26px;
       position: relative;
-      margin: 20px 0 15px;
+      margin: 25px 0 15px;
       display: flex;
       align-items: center;
-      padding: 4px;
       touch-action: none;
-    }
-    
-    #sliderProgress {
-      position: absolute;
-      left: 4px;
-      top: 4px;
-      bottom: 4px;
-      width: 48px;
-      background: linear-gradient(90deg, #60a5fa, #3b82f6);
-      border-radius: 24px;
-      pointer-events: none;
     }
 
     .slider-handle {
-      width: 48px;
-      height: 48px;
-      background: #ffffff;
+      width: 58px;
+      height: 58px;
+      background: var(--primary);
       border-radius: 50%;
       position: absolute;
-      left: 4px;
+      left: 0;
       display: flex;
       align-items: center;
       justify-content: center;
+      color: white;
       font-size: 24px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      touch-action: none;
     }
 
     /* FAZA 2 - Mikrofon */
     .result-display {
-      width: 120px;
-      height: 120px;
-      border-radius: 24px;
+      width: 140px;
+      height: 140px;
+      border-radius: 20px;
       background: #f1f5f9;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 64px;
+      font-size: 70px;
       margin: 15px 0;
       border: 3px solid #e2e8f0;
       transition: all 0.3s ease;
     }
-    .result-display.hidden-content { filter: blur(14px); opacity: 0.3; }
+    .result-display.hidden-content { filter: blur(12px); opacity: 0.25; }
 
     .mic-button {
       width: 90px;
@@ -293,7 +284,7 @@
     .mic-button.listening { background: var(--danger); color: #ffffff; animation: pulse 1.2s infinite; }
     .mic-button.success { background: var(--success); color: #ffffff; transform: scale(1.08); }
 
-    .status-text { font-size: 16px; font-weight: 700; color: #64748b; margin: 8px 0; min-height: 26px; text-align: center; }
+    .status-text { font-size: 18px; font-weight: 600; color: #64748b; margin: 8px 0; min-height: 26px; text-align: center; }
     .heard-text { font-size: 15px; color: #0ea5e9; font-style: italic; min-height: 20px; margin-bottom: 8px; }
 
     /* FAZA 3 - Slaganje */
@@ -306,33 +297,35 @@
       justify-content: center;
     }
     .char-box {
-      width: 52px;
-      height: 60px;
-      border-radius: 12px;
-      background: transparent;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 30px;
-      font-weight: 900;
-      border-bottom: 4px solid #cbd5e1;
-      color: #1e293b;
-    }
-    .char-box.filled { border-bottom-color: var(--success); color: var(--success); }
-
-    .char-tile {
       width: 56px;
       height: 56px;
-      border-radius: 14px;
-      background: #f8fafc;
-      border: 2px solid #cbd5e1;
-      box-shadow: 0 4px 0 #cbd5e1;
+      border-radius: 12px;
+      background: #e2e8f0;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 26px;
-      font-weight: 800;
-      color: #1e293b;
+      font-weight: bold;
+      border: 2px dashed #94a3b8;
+    }
+    .char-box.filled {
+      border: none;
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .char-tile {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      background: #ffffff;
+      border: 2px solid #cbd5e1;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      font-weight: bold;
       cursor: pointer;
     }
     .char-tile:active { transform: translateY(4px); box-shadow: 0 0 0 #cbd5e1; }
@@ -341,8 +334,8 @@
       background: var(--success);
       color: white;
       border: none;
-      padding: 14px 28px;
-      border-radius: 16px;
+      padding: 12px 28px;
+      border-radius: 14px;
       font-size: 18px;
       font-weight: bold;
       cursor: pointer;
@@ -353,7 +346,7 @@
       background: transparent; border: none; color: #94a3b8; font-size: 13px; text-decoration: underline; cursor: pointer; margin-top: 8px; display: none;
     }
 
-    .nav-controls { display: flex; justify-content: space-between; width: 100%; margin-top: 5px; }
+    .nav-controls { display: flex; justify-content: space-between; width: 100%; margin-top: 15px; }
     .nav-arrow { background: transparent; border: 1px solid #cbd5e1; padding: 6px 14px; border-radius: 10px; color: #64748b; font-size: 14px; cursor: pointer; }
   </style>
 </head>
@@ -402,14 +395,13 @@
       <button class="nav-arrow" id="nextWordBtn">Sljedeća →</button>
     </div>
 
-    <!-- 1. FAZA: SLAJDER -->
+    <!-- 1. FAZA: SLAJDER (Tvoj originalni HTML za slider) -->
     <div class="stage active" id="stageSlider">
       <div class="word-preview" id="sliderWordBox"></div>
       <div class="track-container" id="track">
-        <div id="sliderProgress"></div>
         <div class="slider-handle" id="sliderHandle">⭐</div>
       </div>
-      <div class="status-text">Povuci zvjezdicu lijevo-desno 👉</div>
+      <div class="status-text">Povuci krug prstom do kraja!</div>
     </div>
 
     <!-- 2. FAZA: MIKROFON -->
@@ -466,10 +458,6 @@
     
     let currentMapLevel = 0; 
     let solvedInLevel = 0;
-    
-    let isDragging = false;
-    let lastActiveIndex = -1;
-    let lastSpokenTime = 0;
 
     function getTargetForLevel() { return 3 + currentMapLevel; }
 
@@ -704,15 +692,18 @@
       document.getElementById(stageId).classList.add("active");
     }
 
-    // ==========================================
-    // STARI POUZDANI SUSTAV (BEZ BLOKIRANJA)
-    // ==========================================
+    // =========================================================
+    // ORIGINALNI JAVASCRIPT ZA SLAJDER (100% TVOJ KOD S POČETKA)
+    // =========================================================
+    
+    const track = document.getElementById("track");
+    const handle = document.getElementById("sliderHandle");
+    let isDragging = false;
+    let lastActiveIndex = -1;
 
     function resetSliderHandle() {
-      handle.style.left = "4px";
-      progressFill.style.width = "48px";
+      handle.style.left = "0px";
       lastActiveIndex = -1;
-      lastSpokenTime = 0;
       document.querySelectorAll(".letter-node").forEach(n => n.classList.remove("active"));
     }
 
@@ -724,34 +715,21 @@
 
     function handleMove(e) {
       if (!isDragging) return;
-      
       const rect = track.getBoundingClientRect();
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      
-      const minX = 4;
-      const maxX = rect.width - 52;
-      let currentX = clientX - rect.left - 24;
+      let pos = clientX - rect.left - 29;
+      const maxPos = rect.width - 58;
 
-      if (currentX < minX) currentX = minX;
-      if (currentX > maxX) currentX = maxX;
+      if (pos < 0) pos = 0;
+      if (pos > maxPos) pos = maxPos;
 
-      handle.style.left = currentX + "px";
-      progressFill.style.width = (currentX + 48) + "px";
+      handle.style.left = `${pos}px`;
 
-      const progress = (currentX - minX) / (maxX - minX);
+      const progress = pos / maxPos;
+      const index = Math.min(Math.floor(progress * graphemes.length), graphemes.length - 1);
 
-      // MATEMATIČKO MAPIRANJE: postotak prelazka savršeno se poklapa s razmakom slova
-      let index = 0;
-      const numLetters = graphemes.length;
-      if (numLetters > 1) {
-        index = Math.round(progress * (numLetters - 1));
-      }
-
-      const now = Date.now();
-      if (index !== lastActiveIndex && (now - lastSpokenTime > 120)) {
+      if (index !== lastActiveIndex && index >= 0) {
         lastActiveIndex = index;
-        lastSpokenTime = now;
-        
         document.querySelectorAll(".letter-node").forEach((n, i) => {
           if (i === index) {
             n.classList.add("active");
@@ -763,8 +741,7 @@
         });
       }
 
-      // Prelazak na iduću fazu
-      if (progress >= 0.98) {
+      if (progress >= 0.96) {
         isDragging = false;
         playTone(587.33, 0.15);
         setTimeout(() => {
@@ -784,13 +761,11 @@
       isDragging = false;
       const rect = track.getBoundingClientRect();
       const currentPos = parseFloat(handle.style.left || 0);
-      
-      if (currentPos / (rect.width - 52) < 0.94) {
+      if (currentPos / (rect.width - 58) < 0.95) {
         resetSliderHandle();
       }
     }
 
-    // STARI EVENT LISTENERS KOJI SIGURNO RADE NA iPADU
     track.addEventListener("mousedown", handleStart);
     window.addEventListener("mousemove", handleMove);
     window.addEventListener("mouseup", handleEnd);
@@ -798,7 +773,7 @@
     window.addEventListener("touchmove", handleMove, { passive: true });
     window.addEventListener("touchend", handleEnd);
 
-    // ==========================================
+    // =========================================================
 
     // 2. FAZA: MIKROFON
     const micBtn = document.getElementById("micBtn");
@@ -881,7 +856,7 @@
 
     goToSpellBtn.onclick = () => showStage("stageSpelling");
 
-    // 3. FAZA: SLAGANJE SLOVA
+    // 3. FAZA: SLAGANJE SLOVA (RESET NA GREŠKU)
     function setupSpellingStage() {
       const slotContainer = document.getElementById("slotContainer");
       const trayContainer = document.getElementById("trayContainer");
